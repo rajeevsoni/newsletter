@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NewsletterAPI.Models;
 using NewsletterAPI.RedisDocument;
-using NewsletterAPI.Validators;
 using Redis.OM;
 
 namespace NewsletterAPI.Controllers
@@ -10,20 +9,20 @@ namespace NewsletterAPI.Controllers
     [Route("[controller]")]
     public class SubscriptionController : ControllerBase
     {
-        private readonly ILogger<SubscriptionController> _logger;
         private readonly IConfiguration _configuration;
         private readonly RedisConnectionProvider _provider;
 
 
-        public SubscriptionController(ILogger<SubscriptionController> logger)
+        public SubscriptionController(IConfiguration configuration, RedisConnectionProvider provider)
         {
-            _logger = logger;
+            _configuration = configuration;
+            _provider = provider;
         }
 
         [HttpPost]
         public async Task<IActionResult> Subscribe([FromBody]SubscribeRequest subscribeRequest)
         {
-            if (string.IsNullOrWhiteSpace(subscribeRequest.Email) || !subscribeRequest.Email.IsValidEmail())
+            if (string.IsNullOrWhiteSpace(subscribeRequest.Email))
             {
                 return BadRequest();
             }
@@ -41,7 +40,7 @@ namespace NewsletterAPI.Controllers
         [HttpDelete]
         public async Task<IActionResult> UnSubscribe([FromBody] UnSubscribeRequest unSubscribeRequest)
         {
-            if (string.IsNullOrWhiteSpace(unSubscribeRequest.Email) || !unSubscribeRequest.Email.IsValidEmail())
+            if (string.IsNullOrWhiteSpace(unSubscribeRequest.Email))
             {
                 return BadRequest();
             }
